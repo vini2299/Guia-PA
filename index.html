@@ -884,32 +884,81 @@ function renderAtb(){
 
 /* ---------- Peso / Dose pediátrica ---------- */
 const PEDS=[
- {n:'Paracetamol — gotas 200 mg/mL',r:'10–15 mg/kg/dose, 6/6h',f:w=>{const a=10*w,b=15*w;return `${Math.round(a)}–${Math.round(b)} mg/dose  (${(a/200).toFixed(1)}–${(b/200).toFixed(1)} mL), 6/6h`}},
- {n:'Dipirona — gotas 500 mg/mL',r:'10–25 mg/kg/dose, 6/6h (≈1 gota/2 kg)',f:w=>{const a=10*w,b=25*w;return `${Math.round(a)}–${Math.round(b)} mg/dose  (${Math.round(w/2)} gotas ≈), 6/6h`}},
- {n:'Ibuprofeno — gotas 50 mg/mL',r:'5–10 mg/kg/dose, 8/8h',f:w=>{const a=5*w,b=10*w;return `${Math.round(a)}–${Math.round(b)} mg/dose  (${(a/50).toFixed(1)}–${(b/50).toFixed(1)} mL), 8/8h`}},
- {n:'Amoxicilina — susp 250 mg/5 mL',r:'50 mg/kg/dia ÷ 8/8h',f:w=>{const d=50*w/3;return `${Math.round(d)} mg/dose  (${(d/50).toFixed(1)} mL), 8/8h`}},
- {n:'Amoxicilina+clav — susp 250/62,5 mg/5 mL',r:'50 mg/kg/dia (amox) ÷ 8/8h',f:w=>{const d=50*w/3;return `${Math.round(d)} mg/dose  (${(d/50).toFixed(1)} mL), 8/8h`}},
- {n:'Azitromicina — susp 200 mg/5 mL',r:'10 mg/kg/dia, 1x/dia (3–5 d)',f:w=>{const d=10*w;return `${Math.round(d)} mg/dia  (${(d/40).toFixed(1)} mL), 1x/dia`}},
- {n:'Cefalexina — susp 250 mg/5 mL',r:'50 mg/kg/dia ÷ 6/6h',f:w=>{const d=50*w/4;return `${Math.round(d)} mg/dose  (${(d/50).toFixed(1)} mL), 6/6h`}},
- {n:'Prednisolona — 3 mg/mL',r:'1–2 mg/kg/dia (máx 60 mg)',f:w=>{let a=1*w,b=Math.min(2*w,60);return `${Math.round(a)}–${Math.round(b)} mg/dia  (${(a/3).toFixed(1)}–${(b/3).toFixed(1)} mL)`}},
- {n:'Dexametasona (crupe) — 4 mg/mL',r:'0,15–0,6 mg/kg dose única (máx 16 mg)',f:w=>{let a=0.15*w,b=Math.min(0.6*w,16);return `${a.toFixed(1)}–${b.toFixed(1)} mg  (${(a/4).toFixed(1)}–${(b/4).toFixed(1)} mL) dose única`}},
- {n:'Salbutamol — NBZ (gotas 5 mg/mL)',r:'≈1 gota/2–3 kg (mín 5, máx 20) em 3–4 mL SF',f:w=>{let g=Math.max(5,Math.min(20,Math.round(w/2.5)));return `${g} gotas em 3–4 mL de SF 0,9%, 20/20 min`}},
- {n:'Adrenalina — anafilaxia IM (1 mg/mL)',r:'0,01 mg/kg (máx 0,5 mg)',f:w=>{let d=Math.min(0.01*w,0.5);return `${d.toFixed(2)} mg = ${d.toFixed(2)} mL IM (vasto lateral)`}},
- {n:'Adrenalina — PCR IV (1:10.000)',r:'0,01 mg/kg = 0,1 mL/kg',f:w=>`${(0.01*w).toFixed(2)} mg = ${(0.1*w).toFixed(1)} mL IV, a cada 3–5 min`},
- {n:'Midazolam — IM (convulsão)',r:'0,1–0,2 mg/kg (máx 10 mg)',f:w=>{let a=0.1*w,b=Math.min(0.2*w,10);return `${a.toFixed(1)}–${b.toFixed(1)} mg IM`}},
- {n:'Diazepam — IV (convulsão)',r:'0,3 mg/kg (máx 10 mg)',f:w=>`${Math.min(0.3*w,10).toFixed(1)} mg IV lento`},
- {n:'Ceftriaxona — IV/IM',r:'50–100 mg/kg/dia (meningite 100)',f:w=>`${Math.round(50*w)}–${Math.round(100*w)} mg/dia`},
- {n:'Soro de manutenção (Holliday-Segar)',r:'100/50/20 mL/kg/dia',f:w=>{let v=w<=10?100*w:w<=20?1000+50*(w-10):1500+20*(w-20);return `${Math.round(v)} mL/dia  (${(v/24).toFixed(0)} mL/h)`}},
- {n:'Expansão volêmica',r:'SF 0,9% ou RL 20 mL/kg em bolus',f:w=>`${Math.round(20*w)} mL em bolus (reavaliar)`},
- {n:'Sais de reidratação oral (SRO)',r:'50–100 mL/kg em 4h + perdas',f:w=>`${Math.round(50*w)}–${Math.round(100*w)} mL em 4 h`},
+ // ---- Antitérmicos / analgésicos (gotas) ----
+ {n:'Paracetamol — gotas 200 mg/mL (1 gota = 10 mg)',r:'10–15 mg/kg/dose, 6/6 h (máx 75 mg/kg/dia)',
+  f:w=>{const d=12.5*w;const ml=d/200;const gt=Math.round(d/10);return fmt(d,'mg',ml,gt)+', 6/6 h — faixa '+Math.round(10*w)+'–'+Math.round(15*w)+' mg'}},
+ {n:'Dipirona — gotas 500 mg/mL (1 gota = 25 mg)',r:'15 mg/kg/dose, 6/6 h (≈ 1 gota para cada 2 kg)',
+  f:w=>{const d=15*w;const ml=d/500;const gt=Math.round(d/25);return fmt(d,'mg',ml,gt)+', 6/6 h (regra prática: '+Math.round(w/2)+' gotas)'}},
+ {n:'Ibuprofeno — gotas 50 mg/mL (1 gota = 2,5 mg)',r:'5–10 mg/kg/dose, 8/8 h (> 6 meses)',
+  f:w=>{const d=7.5*w;const ml=d/50;const gt=Math.round(d/2.5);return fmt(d,'mg',ml,gt)+', 8/8 h — faixa '+Math.round(5*w)+'–'+Math.round(10*w)+' mg'}},
+ // ---- Antibióticos (suspensão) ----
+ {n:'Amoxicilina — susp 250 mg/5 mL',r:'50 mg/kg/dia ÷ 8/8 h (otite/pneumonia: 80–90 mg/kg/dia)',
+  f:w=>{const d=50*w/3;const ml=d/50;return fmt(d,'mg',ml,null)+' de 8/8 h · dose alta (90 mg/kg/dia): '+(90*w/3/50).toFixed(1)+' mL 8/8 h'}},
+ {n:'Amoxicilina + clavulanato — susp 250/62,5 mg/5 mL',r:'50 mg/kg/dia ÷ 8/8 h (ou 12/12 h na 400/57)',
+  f:w=>{const d=50*w/3;const ml=d/50;return fmt(d,'mg',ml,null)+' de 8/8 h'}},
+ {n:'Azitromicina — susp 200 mg/5 mL',r:'10 mg/kg/dia, 1x/dia por 3–5 dias',
+  f:w=>{const d=10*w;const ml=d/40;return fmt(d,'mg',ml,null)+' 1x/dia'}},
+ {n:'Cefalexina — susp 250 mg/5 mL',r:'50 mg/kg/dia ÷ 6/6 h',
+  f:w=>{const d=50*w/4;const ml=d/50;return fmt(d,'mg',ml,null)+' de 6/6 h'}},
+ {n:'Sulfametoxazol+trimetoprima — susp 200/40 mg/5 mL',r:'8 mg/kg/dia de TMP ÷ 12/12 h',
+  f:w=>{const tmp=8*w/2;const ml=tmp/8;return fmt(tmp,'mg de TMP',ml,null)+' de 12/12 h'}},
+ // ---- Corticoides / respiratório ----
+ {n:'Prednisolona — solução 3 mg/mL',r:'1–2 mg/kg/dia (asma: 1–2 mg/kg/dia por 3–5 dias; máx 40 mg)',
+  f:w=>{const d=Math.min(2*w,40);const ml=d/3;return fmt(d,'mg',ml,null)+' 1x/dia pela manhã'}},
+ {n:'Dexametasona (crupe) — 4 mg/mL',r:'0,6 mg/kg dose única (máx 10 mg) VO/IM/IV',
+  f:w=>{const d=Math.min(0.6*w,10);const ml=d/4;return fmt(d,'mg',ml,null)+' dose única'}},
+ {n:'Salbutamol — nebulização (gotas 5 mg/mL)',r:'0,1–0,15 mg/kg/dose (mín 2,5 mg / máx 5 mg) em 3–5 mL de SF',
+  f:w=>{const d=Math.min(Math.max(0.15*w,2.5),5);const gt=Math.round(d/0.25);return d.toFixed(1)+' mg = <b>'+gt+' gotas</b> em 3–5 mL de SF (mín 10 / máx 20 gotas), a cada 20 min na crise'}},
+ {n:'Brometo de ipratrópio — nebulização (gotas 0,25 mg/mL)',r:'< 10 kg: 10 gotas · ≥ 10 kg: 20 gotas, junto com o salbutamol',
+  f:w=>{const gt=w<10?10:20;return '<b>'+gt+' gotas</b> ('+(gt*0.0125).toFixed(2)+' mg) na mesma nebulização, a cada 20 min na 1ª hora'}},
+ // ---- Emergências ----
+ {n:'Adrenalina — anafilaxia IM (1 mg/mL)',r:'0,01 mg/kg IM na coxa (máx 0,5 mg), repetir 5–15 min',
+  f:w=>{const d=Math.min(0.01*w,0.5);return d.toFixed(2)+' mg = <b>'+d.toFixed(2)+' mL</b> IM na face ântero-lateral da coxa'}},
+ {n:'Adrenalina — PCR IV (1:10.000)',r:'0,01 mg/kg IV/IO a cada 3–5 min',
+  f:w=>{const d=0.01*w;return d.toFixed(2)+' mg = <b>'+(d*10).toFixed(1)+' mL</b> da solução 1:10.000 (1 mg diluído em 10 mL)'}},
+ {n:'Midazolam — IM/nasal (convulsão)',r:'0,2 mg/kg (máx 10 mg) se sem acesso venoso',
+  f:w=>{const d=Math.min(0.2*w,10);const ml=d/5;return fmt(d,'mg',ml,null)+' IM ou intranasal (ampola 5 mg/mL)'}},
+ {n:'Diazepam — IV (convulsão)',r:'0,2–0,3 mg/kg IV lento (máx 10 mg)',
+  f:w=>{const d=Math.min(0.25*w,10);const ml=d/5;return fmt(d,'mg',ml,null)+' IV lento (ampola 5 mg/mL) — pode repetir 1x'}},
+ {n:'Ceftriaxona — IV/IM',r:'50–100 mg/kg/dia (meningite 100 mg/kg/dia ÷ 12/12 h)',
+  f:w=>{const d=75*w;return Math.round(d)+' mg/dia (meningite: '+Math.round(100*w/2)+' mg de 12/12 h) — reconstituir 1 g em 10 mL = 100 mg/mL → <b>'+(d/100).toFixed(1)+' mL/dia</b>'}},
+ {n:'Ondansetrona — vômitos (4 mg/2 mL)',r:'0,15 mg/kg/dose IV (máx 4 mg) — VO 2 mg (8–15 kg) / 4 mg (> 15 kg)',
+  f:w=>{const d=Math.min(0.15*w,4);const ml=d/2;return fmt(d,'mg',ml,null)+' IV lento'}},
+ // ---- Hidratação ----
+ {n:'Soro de manutenção (Holliday-Segar)',r:'100 mL/kg até 10 kg + 50 mL/kg de 10–20 kg + 20 mL/kg acima de 20 kg',
+  f:w=>{let v=0;v+=Math.min(w,10)*100;if(w>10)v+=Math.min(w-10,10)*50;if(w>20)v+=(w-20)*20;return Math.round(v)+' mL/24 h = <b>'+Math.round(v/24)+' mL/h</b>'}},
+ {n:'Expansão volêmica',r:'20 mL/kg de SF 0,9% em 20 min (repetir conforme resposta)',
+  f:w=>{return '<b>'+Math.round(20*w)+' mL</b> de SF 0,9% IV em 20 min (choque séptico: reavaliar após cada expansão)'}},
+ {n:'Sais de reidratação oral (SRO)',r:'Plano B: 50–100 mL/kg em 4 h · Plano A: 10 mL/kg após cada evacuação',
+  f:w=>{return 'Plano B: <b>'+Math.round(50*w)+'–'+Math.round(100*w)+' mL</b> em 4 h · Plano A: '+Math.round(10*w)+' mL após cada evacuação/vômito'}},
+ // ---- Suplementação da puericultura ----
+ {n:'SUPLEMENTAÇÃO — Vitamina D (gotas 200 UI/gota)',r:'400 UI/dia do 1º mês aos 12 meses · 600 UI/dia de 12 a 24 meses',
+  f:w=>{return '400 UI/dia = <b>2 gotas/dia</b> (até 12 meses) · 600 UI/dia = <b>3 gotas/dia</b> (12–24 meses). Iniciar na 1ª semana de vida, mesmo em aleitamento exclusivo'}},
+ {n:'SUPLEMENTAÇÃO — Ferro profilático (sulfato ferroso 25 mg/mL: 1 gota = 1,25 mg)',r:'1 mg/kg/dia de ferro elementar dos 3 aos 24 meses (prematuro/BP: 2 mg/kg desde 30 dias)',
+  f:w=>{const d=1*w;const gt=Math.round(d/1.25);const d2=2*w;const gt2=Math.round(d2/1.25);
+    return '1 mg/kg/dia = '+d.toFixed(1)+' mg = <b>'+gt+' gotas/dia</b> · prematuro/baixo peso (2 mg/kg): '+d2.toFixed(1)+' mg = <b>'+gt2+' gotas/dia</b>'}},
+ {n:'Ferro — tratamento de anemia ferropriva',r:'3–5 mg/kg/dia de ferro elementar ÷ 1–2 tomadas, por 3–6 meses',
+  f:w=>{const d=4*w;const gt=Math.round(d/1.25);const gt2=Math.round(gt/2);return d.toFixed(0)+' mg/dia = <b>'+gt+' gotas/dia</b> → dividir em 2 tomadas de <b>'+gt2+' gotas</b> (sulfato ferroso 25 mg/mL), longe do leite; reavaliar hemograma em 30–60 dias'}},
+ {n:'SUPLEMENTAÇÃO — Vitamina A (megadose, programa MS)',r:'6–11 meses: 100.000 UI dose única · 12–59 meses: 200.000 UI a cada 6 meses',
+  f:w=>{return '6–11 meses: <b>100.000 UI</b> (1 cápsula) · 12–59 meses: <b>200.000 UI</b> a cada 6 meses'}},
+ {n:'Albendazol (vermifugação)',r:'400 mg dose única a partir de 1 ano (repetir conforme programa)',
+  f:w=>{return '<b>400 mg</b> VO dose única (suspensão 40 mg/mL = 10 mL)'}},
 ];
+function fmt(dose,unit,ml,gt){
+  let s=(Math.round(dose*10)/10)+' '+unit;
+  const partes=[];
+  if(ml!=null)partes.push('<b>'+(ml<1?ml.toFixed(2):ml.toFixed(1))+' mL</b>');
+  if(gt!=null)partes.push('<b>'+gt+' gotas</b>');
+  return s+(partes.length?' = '+partes.join(' = '):'');
+}
+
 function renderPeds(){
   const w=parseFloat($('#pesoIn').value||0);const box=$('#pedsList');
   if(!w||w<=0){box.innerHTML='<div class="empty">Digite o peso para calcular as doses.</div>';return}
   box.innerHTML=PEDS.map(p=>{
-    const out=p.f(w);const line=p.n.split(' — ')[0]+': '+out;
+    const out=p.f(w);const line=p.n.split(' — ')[0]+': '+out.replace(/<[^>]+>/g,'');
     return '<div class="pedrow"><button class="cp" onclick="copy('+JSON.stringify(line).replace(/"/g,'&quot;')+',this)">copiar</button>'+
-      '<div class="nm">'+esc(p.n)+'</div><div class="rule">'+esc(p.r)+'</div><div class="out">'+esc(out)+'</div></div>';
+      '<div class="nm">'+esc(p.n)+'</div><div class="rule">'+esc(p.r)+'</div><div class="out" style="line-height:1.5">'+out+'</div></div>';
   }).join('');
 }
 
@@ -1545,7 +1594,7 @@ function applyContext(){const c=getClinicalContext();const set=(id,v)=>{const e=
 /* ---- workspaces e subabas ---- */
 const WORKSPACES={
  adulto:{tabs:[['doencas','Condutas',null],['pront2','Prontuário',null],['urg','Urgências',null],['meds','Medicações',null],['atb','Antibióticos',null],['exames','Exames',null],['cids','CIDs',null],['rastreios','Rastreios',null],['rotinas','Rotinas',null],['notif','Notificação',null]]},
- ped:{tabs:[['doencas','Condutas','PEDIATRIA'],['pront2','Prontuário',null],['notif','Notificação',null],['urg','Urgências',null],['peso','Peso/Dose',null],['meds','Medicações',null],['atb','Antibióticos',null],['exames','Exames',null],['cids','CIDs',null]]},
+ ped:{tabs:[['doencas','Condutas','PEDIATRIA'],['pront2','Prontuário',null],['peso','Peso/Dose',null],['urg','Urgências',null],['rotinas','Rotinas',null],['notif','Notificação',null],['meds','Medicações',null],['atb','Antibióticos',null],['exames','Exames',null],['cids','CIDs',null]]},
  cti:{tabs:[['doencas','Condutas',null],['pront2','Prontuário',null],['rotinas','Rotinas',null],['bic','Drogas / BIC',null],['vm','VM',null],['gaso','Gasometria',null],['intub','Intubação',null],['meds','Medicações',null],['exames','Exames',null],['cids','CIDs',null]]},
  calculadoras:{tabs:[['calc','Escores',null],['formulas','Fórmulas',null],['doencas','Eletrólitos','HIDROELETROL']]},
  receita:{tabs:[['receita','Receita',null]]},
